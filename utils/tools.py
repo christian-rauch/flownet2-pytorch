@@ -1,4 +1,4 @@
-# freda (todo) : 
+# freda (todo) :
 
 import os, time, sys, math
 import subprocess, shutil
@@ -21,7 +21,7 @@ def module_to_dict(module, exclude=[]):
                      and x not in exclude
                      and getattr(module, x) not in exclude])
 
-class TimerBlock: 
+class TimerBlock:
     def __init__(self, title):
         print(("{}".format(title)))
 
@@ -46,7 +46,7 @@ class TimerBlock:
             duration = duration / 60.
             units = 'm'
         print(("  [{:.3f}{}] {}".format(duration, units, string)))
-    
+
     def log2file(self, fid, string):
         fid = open(fid, 'a')
         fid.write("%s\n"%(string))
@@ -57,7 +57,7 @@ def add_arguments_for_module(parser, module, argument_for_class, default, skip_p
 
     module_dict = module_to_dict(module)
     argument_group.add_argument('--' + argument_for_class, type=str, default=default, choices=list(module_dict.keys()))
-    
+
     args, unknown_args = parser.parse_known_args()
     class_obj = module_dict[vars(args)[argument_for_class]]
 
