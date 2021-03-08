@@ -1,34 +1,39 @@
+#!/usr/bin/env python3
+
 import torch
 import numpy as np
 import argparse
 
-from Networks.FlowNet2 import FlowNet2  # the path is depended on where you create this module
-from frame_utils import read_gen  # the path is depended on where you create this module
+from models import FlowNet2
+from utils.frame_utils import read_gen
 
 if __name__ == '__main__':
     # obtain the necessary args for construct the flownet framework
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, default="FlowNet2_checkpoint.pth.tar")
+    parser.add_argument("img1", type=str)
+    parser.add_argument("img2", type=str)
     parser.add_argument('--fp16', action='store_true', help='Run model in pseudo-fp16 mode (fp16 storage fp32 math).')
     parser.add_argument("--rgb_max", type=float, default=255.)
-    
+    parser.add_argument("--flow_out", type=str, default="/tmp/flow.flo")
+
     args = parser.parse_args()
 
     # initial a Net
     net = FlowNet2(args).cuda()
     # load the state_dict
-    dict = torch.load("/home/hjj/PycharmProjects/flownet2_pytorch/FlowNet2_checkpoint.pth.tar")
+    dict = torch.load(args.model)
     net.load_state_dict(dict["state_dict"])
 
     # load the image pair, you can find this operation in dataset.py
-    pim1 = read_gen("/home/hjj/flownet2-master/data/FlyingChairs_examples/0000007-img0.ppm")
-    pim2 = read_gen("/home/hjj/flownet2-master/data/FlyingChairs_examples/0000007-img1.ppm")
+    pim1 = read_gen(args.img1)
+    pim2 = read_gen(args.img2)
     images = [pim1, pim2]
     images = np.array(images).transpose(3, 0, 1, 2)
     im = torch.from_numpy(images.astype(np.float32)).unsqueeze(0).cuda()
 
-    # process the image pair to obtian the flow
+    # process the image pair to obtain the flow
     result = net(im).squeeze()
-
 
     # save flow, I reference the code in scripts/run-flownet.py in flownet2-caffe project
     def writeFlow(name, flow):
@@ -42,4 +47,5 @@ if __name__ == '__main__':
 
 
     data = result.data.cpu().numpy().transpose(1, 2, 0)
-    writeFlow("/home/hjj/flownet2-master/data/FlyingChairs_examples/0000007-img.flo", data)
+    if args.flow_out:
+        writeFlow(args.flow_out, data)
