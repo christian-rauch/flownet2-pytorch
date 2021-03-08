@@ -29,7 +29,7 @@ from utils.param_utils import *
 
 width = 256
 height = 256
-keys = {'TARGET_WIDTH': width, 
+keys = {'TARGET_WIDTH': width,
         'TARGET_HEIGHT': height,
         'ADAPTED_WIDTH':width,
         'ADAPTED_HEIGHT':height,
